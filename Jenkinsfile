@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        DOCKER_IMAGE = "docker"
+        DOCKER_IMAGE = "dynamic-nginx"
         PROJECT_DIR = "${WORKSPACE}"
     }
 
@@ -10,7 +10,7 @@ pipeline {
         stage('Checkout') {
             steps {
                 echo 'Pulling latest code from Git...'
-                git url: 'https://github.com/12205120/docker.git', branch: 'main'
+                git url: 'https://github.com/12205120/nginx-docker-pipeline.git', branch: 'main'
             }
         }
 
@@ -23,16 +23,16 @@ pipeline {
                     }
                     if (-Not (Test-Path "html/index.html")) {
                         @"
-<!DOCTYPE html>
-<html>
-<head>
-  <title>Initial Page</title>
-</head>
-<body>
-  <h1>Hello from Jenkins!</h1>
-</body>
-</html>
-"@ | Set-Content "html/index.html" -Encoding UTF8
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <title>Initial Page</title>
+    </head>
+    <body>
+      <h1>Hello from Jenkins!</h1>
+    </body>
+    </html>
+    "@ | Set-Content "html/index.html" -Encoding UTF8
                     }
                 '''
             }
@@ -55,6 +55,11 @@ pipeline {
         stage('Rebuild and Restart Docker') {
             steps {
                 echo "Rebuilding and restarting Docker container..."
+
+                // Remove the existing container if it is running
+                bat 'docker ps -q -f "name=dynamic-nginx" | ForEach-Object { docker rm -f $_ }'
+
+                // Rebuild and restart the Docker container
                 bat 'docker-compose down'
                 bat 'docker-compose up --build -d'
             }
