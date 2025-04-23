@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        DOCKER_IMAGE = "dynamic-nginx"
+        DOCKER_IMAGE = "docker"
         PROJECT_DIR = "${WORKSPACE}"
     }
 
